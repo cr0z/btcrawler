@@ -70,8 +70,9 @@ func (c *DhtCrawler) Run() {
 	d.Run()
 }
 
-func (c *DhtCrawler) SetHandler(h func(torrent *BitTorrent)) {
+func (c *DhtCrawler) SetHandler(h func(torrent *BitTorrent)) *DhtCrawler {
 	c.handle = h
+	return c
 }
 
 func defaultHandler(bt *BitTorrent) {

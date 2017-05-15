@@ -11,8 +11,13 @@ type TaskMonitor struct {
 	tasks map[string]task
 }
 
-func (m *TaskMonitor) init() {
+func newDBTaskMonitor() *TaskMonitor {
+	m := &TaskMonitor{}
 	m.tasks = make(map[string]task)
+	return m
+}
+
+func (m *TaskMonitor) init() {
 	for _, v := range m.tasks {
 		v.init()
 	}
@@ -38,7 +43,7 @@ func (m *TaskMonitor) Stop() {
 		v.stop()
 	}
 }
-func Monitor() *TaskMonitor {
+func DBTaskMonitor() *TaskMonitor {
 	if monitor == nil {
 		log.Panic("db task monitor not initailize")
 	}

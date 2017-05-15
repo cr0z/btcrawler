@@ -6,7 +6,6 @@ package db
 import (
 	"crawler"
 	"encoding/json"
-	"time"
 )
 
 type File struct {
@@ -14,9 +13,20 @@ type File struct {
 	Length int           `json:"length"`
 }
 
+/**
+CREATE TABLE `t_bt`(
+	`id`  int NOT NULL AUTO_INCREMENT ,
+	`infohash` varchar(255) NOT NULL,
+	`name` varchar(255),
+	`length` int,
+	`files` varchar(2047),
+	PRIMARY KEY (`id`)
+)
+*/
+
 type BitTorrent struct {
 	ID       int    `gorm:"columns:id" json:"id"`
-	InfoHash string `gorm:"columns:infohash" json:"infohash"`
+	Infohash string `gorm:"columns:infohash" json:"infohash"`
 	Name     string `gorm:"columns:name" json:"name"`
 	Length   int    `gorm:"columns:length" json:"length,omitempty"`
 
@@ -25,13 +35,13 @@ type BitTorrent struct {
 }
 
 func (b *BitTorrent) TableName() string {
-	return "bit_torrent"
+	return "t_bt"
 }
 
 func (b *BitTorrent) From(t *crawler.BitTorrent) *BitTorrent {
 	fb, _ := json.Marshal(t.Files)
 
-	b.InfoHash = t.InfoHash
+	b.Infohash = t.InfoHash
 	b.Name = t.Name
 	b.Length = t.Length
 	b.Files = string(fb)
@@ -41,7 +51,6 @@ func (b *BitTorrent) From(t *crawler.BitTorrent) *BitTorrent {
 func (b *BitTorrent) Insert() error {
 	return mdb.Create(b).Error
 }
-
 
 type BTQuery struct {
 	qStruct

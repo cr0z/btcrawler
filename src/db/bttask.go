@@ -3,7 +3,10 @@
  */
 package db
 
-import "time"
+import (
+	"github.com/x-croz/log"
+	"time"
+)
 
 type btSaveTask struct {
 	btCache []*BitTorrent
@@ -18,14 +21,14 @@ func (t *btSaveTask) init() {
 }
 
 func (t *btSaveTask) start() {
-	tick := time.Tick(time.Minute)
+	tick := time.Tick(time.Minute * 30)
 	for {
 		select {
 		case d := <-t.dChan:
 			t.btCache = append(t.btCache, d)
 		case <-tick:
 			t.save()
-		case <-t.sChan:
+		case <-t.sChan: //stop
 			t.save()
 			return
 		}
@@ -42,13 +45,23 @@ func (t *btSaveTask) onCall(d interface{}) {
 	}
 }
 
+var savedCount = 0
+
 func (t *btSaveTask) save() {
+	if len(t.btCache) == 0 || savedCount > 1000000 {
+		return
+	}
 	temp := t.btCache
 	t.btCache = []*BitTorrent{}
-	//TODO save to db
 	tx := mdb.Begin()
-	for _,v:=range temp{
+	for _, v := range temp {
 		tx.Create(v)
 	}
-	tx.Commit()
+	err := tx.Commit().Error
+	if err == nil {
+		log.Info("save bt success, save count:", len(temp))
+		savedCount += len(temp)
+	} else {
+		log.Warning("save bt faild: ", err)
+	}
 }

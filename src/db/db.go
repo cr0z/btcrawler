@@ -21,9 +21,8 @@ func init() {
 	if err != nil {
 		log.Panic(err)
 	}
-	monitor = &TaskMonitor{}
+	monitor = newDBTaskMonitor()
 	monitor.addTask((&BitTorrent{}).TableName(), &btSaveTask{})
-
 	monitor.init()
 	go monitor.start()
 }
